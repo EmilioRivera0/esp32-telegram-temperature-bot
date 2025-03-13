@@ -16,8 +16,11 @@
    If you'd rather not, just change the below entries to strings with
    the config you want - ie #define EXAMPLE_WIFI_SSID "mywifissid"
 */
-#define EXAMPLE_ESP_WIFI_SSID      "MEGACABLE-2.4G-50AB"
-#define EXAMPLE_ESP_WIFI_PASS      "pj8uJnwRYF"
-#define EXAMPLE_ESP_MAXIMUM_RETRY  10
+#define SSID ""
+#define PASSWD ""
+#define ESP_MAXIMUM_RETRY  10
+
+#define WIFI_CONNECTED_BIT BIT0
+#define WIFI_FAIL_BIT BIT1
 
 void connect_wifi(void);
