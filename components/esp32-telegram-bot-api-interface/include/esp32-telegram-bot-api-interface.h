@@ -11,7 +11,13 @@
 #include "lwip/err.h"
 #include "lwip/sys.h"
 
-#define SSID ""
-#define PASSWD ""
+/* The examples use WiFi configuration that you can set via project configuration menu
 
-void connect_wifi();
+   If you'd rather not, just change the below entries to strings with
+   the config you want - ie #define EXAMPLE_WIFI_SSID "mywifissid"
+*/
+#define EXAMPLE_ESP_WIFI_SSID      "MEGACABLE-2.4G-50AB"
+#define EXAMPLE_ESP_WIFI_PASS      "pj8uJnwRYF"
+#define EXAMPLE_ESP_MAXIMUM_RETRY  10
+
+void connect_wifi(void);
