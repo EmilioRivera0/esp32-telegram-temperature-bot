@@ -11,6 +11,7 @@ void app_main(void)
     DHT11_init(GPIO_NUM_25);
 
     connect_wifi();
+    https_with_url();
     while (1){
         stDht11Reading = DHT11_read();
     
@@ -22,7 +23,6 @@ void app_main(void)
         {
             printf("Error\n\n\n");
         }
-        //fflush(stdout);
         vTaskDelay(pdMS_TO_TICKS(1000));
     }
 }
