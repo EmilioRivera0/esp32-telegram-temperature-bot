@@ -11,11 +11,9 @@
 #include "lwip/err.h"
 #include "lwip/sys.h"
 
-/* The examples use WiFi configuration that you can set via project configuration menu
+#include "soc/soc.h"
+#include "soc/rtc_cntl_reg.h"
 
-   If you'd rather not, just change the below entries to strings with
-   the config you want - ie #define EXAMPLE_WIFI_SSID "mywifissid"
-*/
 #define SSID ""
 #define PASSWD ""
 #define ESP_MAXIMUM_RETRY  10
