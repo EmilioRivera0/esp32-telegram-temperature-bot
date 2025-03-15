@@ -11,11 +11,11 @@
 #include "lwip/err.h"
 #include "lwip/sys.h"
 
-#include "soc/soc.h"
-#include "soc/rtc_cntl_reg.h"
+#include "soc/soc.h" // temp ---------------------------------
+#include "soc/rtc_cntl_reg.h" // temp ---------------------------------
 
-#define SSID ""
-#define PASSWD ""
+#define SSID "MEGACABLE-2.4G-50AB"
+#define PASSWD "pj8uJnwRYF"
 #define ESP_MAXIMUM_RETRY  10
 
 #define WIFI_CONNECTED_BIT BIT0
