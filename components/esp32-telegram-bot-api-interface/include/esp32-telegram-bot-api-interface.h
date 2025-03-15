@@ -1,3 +1,7 @@
+// C Library
+#include <string.h>
+#include <stdlib.h>
+
 // General ESP IDF headers
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -25,8 +29,6 @@
 #include "soc/rtc_cntl_reg.h" // temp ---------------------------------
 
 // Wifi macros and function prototypes
-#define SSID "MEGACABLE-2.4G-50AB"
-#define PASSWD "pj8uJnwRYF"
 #define ESP_MAXIMUM_RETRY  10
 
 #define WIFI_CONNECTED_BIT BIT0
@@ -35,4 +37,6 @@
 void connect_wifi(void);
 
 // HTTP macros and function prototypes
+#define ENDPOINT_LENGTH 500
+#define RESPONSE_BUFFER 1024
 void https_with_url(void);

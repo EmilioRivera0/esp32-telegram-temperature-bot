@@ -1,4 +1,5 @@
 #include "esp32-telegram-bot-api-interface.h"
+#include "keys.h"
 
 // Wifi Functions Implementation ---------------------------------------------------------------------------
 static EventGroupHandle_t s_wifi_event_group;
@@ -140,8 +141,13 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
 
 void https_with_url(void)
 {
+    char* endpoint = (char*)malloc(ENDPOINT_LENGTH);
+    char* r_buffer = (char*)malloc(RESPONSE_BUFFER);
+    *endpoint = '\0';
+    strcat(endpoint, URL);
+
     esp_http_client_config_t config = {
-        .url = "",
+        .url = endpoint,
         .event_handler = _http_event_handler,
         .crt_bundle_attach = esp_crt_bundle_attach,
     };
