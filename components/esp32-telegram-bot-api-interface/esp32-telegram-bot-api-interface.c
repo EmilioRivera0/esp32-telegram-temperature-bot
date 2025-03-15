@@ -143,19 +143,48 @@ void https_with_url(void)
 {
     char* endpoint = (char*)malloc(ENDPOINT_LENGTH);
     char* r_buffer = (char*)malloc(RESPONSE_BUFFER);
+    char tet[RESPONSE_BUFFER] = "\0";
+    int r_length = -1;
     *endpoint = '\0';
+    *r_buffer = '\0';
     strcat(endpoint, URL);
 
     esp_http_client_config_t config = {
         .url = endpoint,
+        .buffer_size = 1024,
+        .buffer_size_tx = 1024,
+        .is_async = true,
         .event_handler = _http_event_handler,
         .crt_bundle_attach = esp_crt_bundle_attach,
+        .skip_cert_common_name_check = true,
     };
     esp_http_client_handle_t client = esp_http_client_init(&config);
-    esp_err_t err = esp_http_client_perform(client);
+    
+    esp_http_client_set_header(client, "User-Agent", "ESP32-Client/1.0");
+    esp_http_client_set_header(client, "Accept", "application/json");
+    esp_log_level_set("HTTP_CLIENT", ESP_LOG_DEBUG);
+
+    esp_err_t err;
+    do {
+        err = esp_http_client_perform(client);  // Llamar repetidamente
+        if (err == ESP_ERR_HTTP_EAGAIN) {
+            ESP_LOGI(TAG_HTTP, "Esperando más datos...");
+            vTaskDelay(pdMS_TO_TICKS(100));  // Pequeño delay antes de reintentar
+        }
+    } while (err == ESP_ERR_HTTP_EAGAIN);
+    //esp_err_t err = esp_http_client_perform(client);
+
 
     if (err == ESP_OK) {
+        int headers_ret = esp_http_client_fetch_headers(client);
+        ESP_LOGI(TAG_HTTP, "esp_http_client_fetch_headers() returned: %d == %d", headers_ret, ESP_FAIL);
+
         ESP_LOGI(TAG_HTTP, "HTTPS Status = %d, content_length = %lld", esp_http_client_get_status_code(client), esp_http_client_get_content_length(client));
+        //r_length = esp_http_client_read(client, r_buffer, RESPONSE_BUFFER);
+        r_length = esp_http_client_read_response(client, tet, RESPONSE_BUFFER);
+        //*(endpoint + r_length) = '\0';
+        //ESP_LOGI(TAG_HTTP, "Response: %s Length: %d", r_buffer, r_length);
+        ESP_LOGI(TAG_HTTP, "Response: %s Length: %d", &tet, r_length);
     } else {
         ESP_LOGE(TAG_HTTP, "Error perform http request %s", esp_err_to_name(err));
     }
