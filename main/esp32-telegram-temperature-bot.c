@@ -11,7 +11,7 @@ void app_main(void)
     DHT11_init(GPIO_NUM_25);
 
     connect_wifi();
-    https_with_url();
+    get_telegram_command();
     while (1){
         stDht11Reading = DHT11_read();
     

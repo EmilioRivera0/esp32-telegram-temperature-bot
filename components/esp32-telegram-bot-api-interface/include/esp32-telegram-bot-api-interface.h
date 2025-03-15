@@ -30,7 +30,6 @@
 
 // Wifi macros and function prototypes
 #define ESP_MAXIMUM_RETRY  10
-
 #define WIFI_CONNECTED_BIT BIT0
 #define WIFI_FAIL_BIT BIT1
 
@@ -39,4 +38,5 @@ void connect_wifi(void);
 // HTTP macros and function prototypes
 #define ENDPOINT_LENGTH 500
 #define RESPONSE_BUFFER 1024
-void https_with_url(void);
+
+void get_telegram_command(void);
