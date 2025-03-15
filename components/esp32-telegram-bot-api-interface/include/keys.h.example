@@ -1,0 +1,5 @@
+#define SSID ""
+#define PASSWD ""
+
+#define URL ""
+#define ADDITIONAL_ENDPOINTS ""
