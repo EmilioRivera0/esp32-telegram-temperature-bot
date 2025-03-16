@@ -12,6 +12,7 @@ void app_main(void)
 
     connect_wifi();
     get_telegram_command();
+    get_response_data();
     while (1){
         stDht11Reading = DHT11_read();
     

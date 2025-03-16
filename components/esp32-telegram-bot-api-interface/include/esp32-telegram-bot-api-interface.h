@@ -38,5 +38,8 @@ void connect_wifi(void);
 // HTTP macros and function prototypes
 #define ENDPOINT_LENGTH 500
 #define RESPONSE_BUFFER 1024
+#define UI_MAX_LENGTH 12
+#define COMMAND_MAX_LENGTH 100
 
 void get_telegram_command(void);
+bool get_response_data(void);
