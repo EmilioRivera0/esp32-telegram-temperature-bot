@@ -14,6 +14,7 @@ void app_main(void)
     init_http_client();
     get_telegram_command();
     get_response_data();
+    answer_command();
     while (1){
         stDht11Reading = DHT11_read();
     

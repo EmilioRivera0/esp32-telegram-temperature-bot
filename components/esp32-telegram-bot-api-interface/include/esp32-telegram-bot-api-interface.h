@@ -40,7 +40,9 @@ void connect_wifi(void);
 #define RESPONSE_BUFFER 1024
 #define ID_MAX_LENGTH 12
 #define COMMAND_MAX_LENGTH 100
+#define QUERY_LENGTH 50
 
 void init_http_client(void);
 void get_telegram_command(void);
 bool get_response_data(void);
+void answer_command(void);
