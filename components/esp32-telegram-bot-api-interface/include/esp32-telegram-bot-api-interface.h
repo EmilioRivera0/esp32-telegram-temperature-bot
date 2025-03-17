@@ -41,5 +41,6 @@ void connect_wifi(void);
 #define ID_MAX_LENGTH 12
 #define COMMAND_MAX_LENGTH 100
 
+void init_http_client(void);
 void get_telegram_command(void);
 bool get_response_data(void);

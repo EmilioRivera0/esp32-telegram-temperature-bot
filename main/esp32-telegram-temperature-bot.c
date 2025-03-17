@@ -11,6 +11,7 @@ void app_main(void)
     DHT11_init(GPIO_NUM_25);
 
     connect_wifi();
+    init_http_client();
     get_telegram_command();
     get_response_data();
     while (1){

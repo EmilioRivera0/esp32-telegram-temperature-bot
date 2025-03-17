@@ -147,19 +147,26 @@ if (err == ESP_OK) {
 }
 */
 
+void init_http_client(void)
+{
+    esp_http_client_config_t config = {
+        .url = URL,
+        .event_handler = _http_event_handler,
+        .crt_bundle_attach = esp_crt_bundle_attach,
+    };
+    client = esp_http_client_init(&config);
+    //esp_http_client_cleanup(client); // -----------------------------------------
+}
+
 void get_telegram_command(void)
 {
     endpoint[0] = '\0';
     strcat(endpoint, URL);
     strcat(endpoint, GET_COMMANDS_ENDPOINT);
+
+    esp_http_client_set_url(client, endpoint);
+    esp_http_client_set_method(client, HTTP_METHOD_GET);
     
-    esp_http_client_config_t config = {
-        .url = endpoint,
-        .event_handler = _http_event_handler,
-        .crt_bundle_attach = esp_crt_bundle_attach,
-    };
-    
-    client = esp_http_client_init(&config);
     esp_err_t err = esp_http_client_perform(client);
 
     if (err == ESP_OK) {
@@ -169,7 +176,6 @@ void get_telegram_command(void)
     } else {
         esp_restart();
     }
-    esp_http_client_cleanup(client);
 }
 
 bool get_response_data(void){
