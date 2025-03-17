@@ -104,6 +104,7 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
                     memcpy(output_buffer + output_len, evt->data, evt->data_len);
                     // r_buffer contains response body
                     memcpy(r_buffer, output_buffer, RESPONSE_BUFFER);
+                    printf("\n\n%s\n\n", r_buffer);
                 }
                 output_len += evt->data_len;
             }
@@ -129,23 +130,6 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
     }
     return ESP_OK;
 }
-
-/*
-// POST
-const char *post_data = "{\"field1\":\"value1\"}";
-esp_http_client_set_url(client, "http://httpbin.org/post");
-esp_http_client_set_method(client, HTTP_METHOD_POST);
-esp_http_client_set_header(client, "Content-Type", "application/json");
-esp_http_client_set_post_field(client, post_data, strlen(post_data));
-err = esp_http_client_perform(client);
-if (err == ESP_OK) {
-    ESP_LOGI(TAG, "HTTP POST Status = %d, content_length = %lld",
-            esp_http_client_get_status_code(client),
-            esp_http_client_get_content_length(client));
-} else {
-    ESP_LOGE(TAG, "HTTP POST request failed: %s", esp_err_to_name(err));
-}
-*/
 
 void init_http_client(void)
 {
@@ -219,21 +203,46 @@ bool get_response_data(void){
     return true;
 }
 
-void answer_command(void)
+void answer_command(int temperature, int humidity)
 {
     char query[QUERY_LENGTH];
+    char post_data[POST_DATA_BUFFER];
+    
+    // answer the command
+    endpoint[0] = '\0';
+    strcat(endpoint, URL);
+    strcat(endpoint, ANSWER_COMMANDS_ENDPOINT);
+    printf("\n\n%s\n\n", endpoint);
 
+    sprintf(post_data, "{\"text\": \"Temperature: %d Humidity: %d\", \"chat_id\": %llu}", temperature, humidity, ci);
+    printf("\n\n%s\n\n", post_data);
+    
+    esp_http_client_set_header(client, "Content-Type", "application/json");
+    esp_http_client_set_post_field(client, post_data, strlen(post_data));
+    esp_http_client_set_method(client, HTTP_METHOD_POST);
+    esp_http_client_set_url(client, endpoint);
+    
+    esp_err_t err = esp_http_client_perform(client);
+
+    if (err == ESP_OK) {
+        ESP_LOGI(TAG_HTTP, "HTTP POST Status = %d, content_length = %lld",
+                esp_http_client_get_status_code(client),
+                esp_http_client_get_content_length(client));
+    } else {
+        ESP_LOGE(TAG_HTTP, "HTTP POST request failed: %s", esp_err_to_name(err));
+    }
+
+    // remove the latet command from the server
     endpoint[0] = '\0';
     strcat(endpoint, URL);
     strcat(endpoint, GET_COMMANDS_ENDPOINT);
     sprintf(query, "?offset=%llu", ui + 1);
     strcat(endpoint, query);
-    printf("\n\n%s\n\n", endpoint);
 
     esp_http_client_set_url(client, endpoint);
     esp_http_client_set_method(client, HTTP_METHOD_GET);
 
-    esp_err_t err = esp_http_client_perform(client);
+    err = esp_http_client_perform(client);
 
     if (err == ESP_OK) {
         // debugging code

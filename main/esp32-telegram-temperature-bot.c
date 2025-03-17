@@ -12,19 +12,18 @@ void app_main(void)
 
     connect_wifi();
     init_http_client();
-    get_telegram_command();
-    get_response_data();
-    answer_command();
+
     while (1){
-        stDht11Reading = DHT11_read();
-    
-        if(DHT11_OK == stDht11Reading.status)
-        {
-            printf("Temperature: %d\n\n\n", stDht11Reading.temperature);
-        } 
-        else
-        {
-            printf("Error\n\n\n");
+        get_telegram_command();
+        if (get_response_data()){
+            while (true){
+                stDht11Reading = DHT11_read();
+                if(DHT11_OK == stDht11Reading.status)
+                {
+                    answer_command(stDht11Reading.temperature, stDht11Reading.humidity);
+                    break;
+                } 
+            }
         }
         vTaskDelay(pdMS_TO_TICKS(1000));
     }
