@@ -68,7 +68,11 @@ void connect_wifi(void)
 }
 
 // HTTP Functions Implementation ---------------------------------------------------------------------------
+static char endpoint[ENDPOINT_LENGTH];
 static char r_buffer[RESPONSE_BUFFER] = "\0";
+static unsigned long long int ci = 0, ui = 0;
+static char command[COMMAND_MAX_LENGTH];
+static esp_http_client_handle_t client = NULL;
 // debugging variable
 static const char *TAG_HTTP = "---------------------------------- HTTP";
 
@@ -145,9 +149,9 @@ if (err == ESP_OK) {
 
 void get_telegram_command(void)
 {
-    char* endpoint = (char*)malloc(ENDPOINT_LENGTH);
-    *endpoint = '\0';
+    endpoint[0] = '\0';
     strcat(endpoint, URL);
+    strcat(endpoint, GET_COMMANDS_ENDPOINT);
     
     esp_http_client_config_t config = {
         .url = endpoint,
@@ -155,7 +159,7 @@ void get_telegram_command(void)
         .crt_bundle_attach = esp_crt_bundle_attach,
     };
     
-    esp_http_client_handle_t client = esp_http_client_init(&config);
+    client = esp_http_client_init(&config);
     esp_err_t err = esp_http_client_perform(client);
 
     if (err == ESP_OK) {
@@ -169,9 +173,8 @@ void get_telegram_command(void)
 }
 
 bool get_response_data(void){
-    int ui = 0;
     short str_len = 0;
-    char uis[UI_MAX_LENGTH], command[COMMAND_MAX_LENGTH];
+    char temp_id[ID_MAX_LENGTH];
     char* ps = NULL, *pe = NULL;
 
     // get update_id
@@ -182,18 +185,27 @@ bool get_response_data(void){
     pe = strchr(ps, ',');
     str_len = ((int)pe - (int)ps) - 1;
     ps++;
-    strncpy(uis, ps, str_len);
-    ui = atoi(uis);
-    printf("\n\nUpdate Id: %d\n\n", ui);
+    strncpy(temp_id, ps, str_len);
+    ui = strtoull(temp_id, NULL, 10);
+    printf("\n\nUpdate Id: %llu\n\n", ui);
+
+    // get chat_id
+    ps = strstr(r_buffer, "chat");
+    ps = strstr(ps, "id");
+    ps = strchr(ps, ':');
+    pe = strchr(ps, ',');
+    str_len = ((int)pe - (int)ps) - 1;
+    ps++;
+    strncpy(temp_id, ps, str_len);
+    ci = strtoull(temp_id, NULL, 10);
+    printf("\n\nChat Id: %llu\n\n", ci);
 
     // get text/command
     ps = strstr(r_buffer, "text");
     ps = strchr(ps, ':');
     ps = strchr(ps, '"');
-    printf("\n\nText: %s\n\n", ps);
     pe = strchr(ps + 1, '"');
     str_len = ((int)pe - (int)ps) - 1;
-    printf("\n\nText Length: %d\n\n", str_len);
     ps++;
     strncpy(command, ps, str_len);
     printf("\n\nCommand: %s\n\n", command);
