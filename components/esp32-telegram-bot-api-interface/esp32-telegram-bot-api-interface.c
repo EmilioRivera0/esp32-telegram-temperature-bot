@@ -233,7 +233,7 @@ void answer_command(int temperature, int humidity)
         strcat(endpoint, URL);
         strcat(endpoint, ANSWER_COMMANDS_ENDPOINT);
 
-        sprintf(post_data, "{\"text\": \"Temperature: %d Humidity: %d\", \"chat_id\": %llu}", temperature, humidity, ci);
+        sprintf(post_data, "{\"text\": \"Temperature: %d°C Humidity: %d%%\", \"chat_id\": %llu}", temperature, humidity, ci);
     
         esp_http_client_set_header(client, "Content-Type", "application/json");
         esp_http_client_set_post_field(client, post_data, strlen(post_data));
