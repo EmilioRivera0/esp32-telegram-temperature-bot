@@ -6,7 +6,9 @@ C source code for programming an ESP32 board to read the temperature and humidit
 - [DHT11 C Library](https://github.com/kuldeepaher01/esp32-DHT11) developed by [kuldeepaher01](https://github.com/kuldeepaher01) (cloned in components/)
 
 ## Example
-[![Watch the video](https://img.youtube.com/vi/NtV3xoK7-p8/maxresdefault.jpg)](https://www.youtube.com/watch?v=NtV3xoK7-p8)
+<div align="center">
+    <iframe width="560" height="315" src="https://www.youtube.com/embed/NtV3xoK7-p8" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+</div>
 
 ## Author
 - @[EmilioRivera0](https://github.com/EmilioRivera0)
