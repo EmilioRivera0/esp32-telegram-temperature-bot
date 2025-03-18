@@ -5,5 +5,8 @@ C source code for programming an ESP32 board to read the temperature and humidit
 - [ESP-IDF](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/get-started/linux-macos-setup.html) installed
 - [DHT11 C Library](https://github.com/kuldeepaher01/esp32-DHT11) developed by [kuldeepaher01](https://github.com/kuldeepaher01) (cloned in components/)
 
+## Example
+[![Watch the video](https://img.youtube.com/vi/NtV3xoK7-p8/maxresdefault.jpg)](https://www.youtube.com/watch?v=NtV3xoK7-p8)
+
 ## Author
 - @[EmilioRivera0](https://github.com/EmilioRivera0)
