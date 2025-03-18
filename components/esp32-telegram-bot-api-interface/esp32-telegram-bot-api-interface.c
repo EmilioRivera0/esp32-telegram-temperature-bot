@@ -5,7 +5,7 @@
 static EventGroupHandle_t s_wifi_event_group;
 static int s_retry_num = 0;
 // debugging variable
-static const char *TAG = "---------------------------------- wifi station";
+//static const char *TAG = "---------------------------------- wifi station";
 
 static void event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data)
 {
@@ -47,11 +47,12 @@ void wifi_init_sta(void)
     esp_wifi_set_config(WIFI_IF_STA, &wifi_config);
     esp_wifi_start();
 
+    xEventGroupWaitBits(s_wifi_event_group, WIFI_CONNECTED_BIT | WIFI_FAIL_BIT, pdFALSE, pdFALSE, portMAX_DELAY);
     // debugging code
-    EventBits_t bits = xEventGroupWaitBits(s_wifi_event_group, WIFI_CONNECTED_BIT | WIFI_FAIL_BIT, pdFALSE, pdFALSE, portMAX_DELAY);
+    /*EventBits_t bits = xEventGroupWaitBits(s_wifi_event_group, WIFI_CONNECTED_BIT | WIFI_FAIL_BIT, pdFALSE, pdFALSE, portMAX_DELAY);
     if (bits & WIFI_CONNECTED_BIT) {
         ESP_LOGI(TAG, "Connected to ap SSID:%s", SSID);
-    }
+    }*/
 }
 
 void connect_wifi(void)
@@ -63,7 +64,6 @@ void connect_wifi(void)
     if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
       ret = nvs_flash_init();
     }
-
     wifi_init_sta();
 }
 
@@ -74,7 +74,7 @@ static unsigned long long int ci = 0, ui = 0;
 static char command[COMMAND_MAX_LENGTH];
 static esp_http_client_handle_t client = NULL;
 // debugging variable
-static const char *TAG_HTTP = "---------------------------------- HTTP";
+//static const char *TAG_HTTP = "---------------------------------- HTTP";
 
 esp_err_t _http_event_handler(esp_http_client_event_t *evt)
 {
@@ -104,7 +104,6 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
                     memcpy(output_buffer + output_len, evt->data, evt->data_len);
                     // r_buffer contains response body
                     memcpy(r_buffer, output_buffer, RESPONSE_BUFFER);
-                    printf("\n\n%s\n\n", r_buffer);
                 }
                 output_len += evt->data_len;
             }
@@ -139,7 +138,6 @@ void init_http_client(void)
         .crt_bundle_attach = esp_crt_bundle_attach,
     };
     client = esp_http_client_init(&config);
-    //esp_http_client_cleanup(client); // -----------------------------------------
 }
 
 void get_telegram_command(void)
@@ -153,13 +151,15 @@ void get_telegram_command(void)
     
     esp_err_t err = esp_http_client_perform(client);
 
-    if (err == ESP_OK) {
+    /*if (err == ESP_OK) {
         // debugging code
         ESP_LOGI(TAG_HTTP, "HTTPS Status = %d, content_length = %lld", esp_http_client_get_status_code(client), esp_http_client_get_content_length(client));
         printf("\n\n%s\n\n", r_buffer);
     } else {
         esp_restart();
-    }
+    }*/
+    if (err != ESP_OK)
+        esp_restart();
 }
 
 bool get_response_data(void){
@@ -177,7 +177,6 @@ bool get_response_data(void){
     ps++;
     strncpy(temp_id, ps, str_len);
     ui = strtoull(temp_id, NULL, 10);
-    printf("\n\nUpdate Id: %llu\n\n", ui);
 
     // get chat_id
     ps = strstr(r_buffer, "chat");
@@ -188,7 +187,6 @@ bool get_response_data(void){
     ps++;
     strncpy(temp_id, ps, str_len);
     ci = strtoull(temp_id, NULL, 10);
-    printf("\n\nChat Id: %llu\n\n", ci);
 
     // get text/command
     ps = strstr(r_buffer, "text");
@@ -198,7 +196,6 @@ bool get_response_data(void){
     str_len = ((int)pe - (int)ps) - 1;
     ps++;
     strncpy(command, ps, str_len);
-    printf("\n\nCommand: %s\n\n", command);
 
     return true;
 }
@@ -207,29 +204,27 @@ void answer_command(int temperature, int humidity)
 {
     char query[QUERY_LENGTH];
     char post_data[POST_DATA_BUFFER];
+    esp_err_t err;
     
-    // answer the command
-    endpoint[0] = '\0';
-    strcat(endpoint, URL);
-    strcat(endpoint, ANSWER_COMMANDS_ENDPOINT);
-    printf("\n\n%s\n\n", endpoint);
+    // answer /status command only
+    if (!strcmp(command, "/status")){
+        endpoint[0] = '\0';
+        strcat(endpoint, URL);
+        strcat(endpoint, ANSWER_COMMANDS_ENDPOINT);
 
-    sprintf(post_data, "{\"text\": \"Temperature: %d Humidity: %d\", \"chat_id\": %llu}", temperature, humidity, ci);
-    printf("\n\n%s\n\n", post_data);
+        sprintf(post_data, "{\"text\": \"Temperature: %d Humidity: %d\", \"chat_id\": %llu}", temperature, humidity, ci);
     
-    esp_http_client_set_header(client, "Content-Type", "application/json");
-    esp_http_client_set_post_field(client, post_data, strlen(post_data));
-    esp_http_client_set_method(client, HTTP_METHOD_POST);
-    esp_http_client_set_url(client, endpoint);
+        esp_http_client_set_header(client, "Content-Type", "application/json");
+        esp_http_client_set_post_field(client, post_data, strlen(post_data));
+        esp_http_client_set_method(client, HTTP_METHOD_POST);
+        esp_http_client_set_url(client, endpoint);
     
-    esp_err_t err = esp_http_client_perform(client);
+        err = esp_http_client_perform(client);
+    
+        esp_http_client_delete_header(client, "Content-Type");
 
-    if (err == ESP_OK) {
-        ESP_LOGI(TAG_HTTP, "HTTP POST Status = %d, content_length = %lld",
-                esp_http_client_get_status_code(client),
-                esp_http_client_get_content_length(client));
-    } else {
-        ESP_LOGE(TAG_HTTP, "HTTP POST request failed: %s", esp_err_to_name(err));
+        if (err != ESP_OK)
+            esp_restart();
     }
 
     // remove the latet command from the server
@@ -244,11 +239,6 @@ void answer_command(int temperature, int humidity)
 
     err = esp_http_client_perform(client);
 
-    if (err == ESP_OK) {
-        // debugging code
-        ESP_LOGI(TAG_HTTP, "HTTPS Status = %d, content_length = %lld", esp_http_client_get_status_code(client), esp_http_client_get_content_length(client));
-        printf("\n\n%s\n\n", r_buffer);
-    } else {
+    if (err != ESP_OK)
         esp_restart();
-    }
 }

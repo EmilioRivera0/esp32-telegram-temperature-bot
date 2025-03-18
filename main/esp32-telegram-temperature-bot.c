@@ -16,7 +16,7 @@ void app_main(void)
     while (1){
         get_telegram_command();
         if (get_response_data()){
-            while (true){
+            while (1){
                 stDht11Reading = DHT11_read();
                 if(DHT11_OK == stDht11Reading.status)
                 {
