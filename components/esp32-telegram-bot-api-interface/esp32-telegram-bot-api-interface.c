@@ -68,6 +68,7 @@ void connect_wifi(void)
 }
 
 // HTTP Functions Implementation ---------------------------------------------------------------------------
+// static variables that will be used multiple times during the programs execution
 static char endpoint[ENDPOINT_LENGTH];
 static char r_buffer[RESPONSE_BUFFER] = "\0";
 static unsigned long long int ci = 0, ui = 0;
@@ -130,6 +131,10 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
     return ESP_OK;
 }
 
+/*
+    Initialize client handle
+    It will be used for GET and POST requests in the entire lifetime of the program
+*/
 void init_http_client(void)
 {
     esp_http_client_config_t config = {
@@ -140,15 +145,21 @@ void init_http_client(void)
     client = esp_http_client_init(&config);
 }
 
+/*
+    Make a GET request to Telegram API asking for any pending updates
+*/
 void get_telegram_command(void)
 {
+    // initialize endpoint
     endpoint[0] = '\0';
     strcat(endpoint, URL);
     strcat(endpoint, GET_COMMANDS_ENDPOINT);
 
+    // modify client handle
     esp_http_client_set_url(client, endpoint);
     esp_http_client_set_method(client, HTTP_METHOD_GET);
     
+    // perform GET request
     esp_err_t err = esp_http_client_perform(client);
 
     /*if (err == ESP_OK) {
@@ -162,7 +173,13 @@ void get_telegram_command(void)
         esp_restart();
 }
 
+/*
+    Process response data to obtain update_id, chat_id and command/text
+    Return true if request body contains an update
+    Return false if request body is empty
+*/
 bool get_response_data(void){
+    // function local methods
     short str_len = 0;
     char temp_id[ID_MAX_LENGTH];
     char* ps = NULL, *pe = NULL;
@@ -200,8 +217,12 @@ bool get_response_data(void){
     return true;
 }
 
+/*
+    Answer the /status command by sending to the user the temperature and humidity, specified in the parameters
+*/
 void answer_command(int temperature, int humidity)
 {
+    // function local methods
     char query[QUERY_LENGTH];
     char post_data[POST_DATA_BUFFER];
     esp_err_t err;
